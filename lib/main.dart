@@ -2,8 +2,13 @@ import 'routes/app_imports.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp().then((value) => Get.put(AuthController()));
-  runApp(const MyApp());
+  try {
+    await Firebase.initializeApp();
+    print('Firebase Initialized');
+  } catch (e) {
+    print('Error initializing Firebase: $e');
+  }
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,9 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'TCC',
+      title: 'NoteSnap',
       initialRoute: AppRoutes.initial,
-      //getPages: AppPages.pages,
+      getPages: AppPages.pages,
     );
   }
 }
