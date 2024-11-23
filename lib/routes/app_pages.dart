@@ -6,7 +6,7 @@ abstract class AppPages {
       name: AppRoutes.initial,
       page: () => LoginScreen(),
     ),
-    /*GetPage(
+    GetPage(
       name: AppRoutes.register,
       page: () => RegisterScreen(),
     ),
@@ -14,7 +14,7 @@ abstract class AppPages {
       name: AppRoutes.forgotten,
       page: () => ForgottenScreen(),
     ),
-    GetPage(
+    /*GetPage(
       name: AppRoutes.home,
       page: () => HomeScreen(),
     ),

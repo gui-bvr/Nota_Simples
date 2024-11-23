@@ -10,11 +10,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var emailController = TextEditingController();
-    var passwordController = TextEditingController();
     return Sizer(
       builder: (context, orientation, deviceType) {
         return Scaffold(
@@ -89,31 +89,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: primaryGreyColor),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: TextField(
-                        controller: passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Ionicons.lock_closed_outline),
-                          suffixIcon: InkWell(
-                            onTap: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            child: Icon(
-                              _obscurePassword
-                                  ? Ionicons.eye_off
-                                  : Ionicons.eye,
-                            ),
+                      color: Colors.white,
+                      border: Border.all(color: primaryGreyColor),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Ionicons.lock_closed_outline),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscurePassword
+                                ? Ionicons.eye_off_outline
+                                : Ionicons.eye_outline,
                           ),
-                          border: InputBorder.none,
-                          hintText: 'Digite sua senha',
                         ),
+                        border: InputBorder.none,
+                        hintText: 'Digite sua senha',
                       ),
                     ),
                   ),
@@ -160,7 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16.sp,
-                            //fontFamily: 'Montserrat',
                             fontWeight: FontWeight.w600,
                           ),
                         ),
