@@ -40,8 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Email',
                       style: TextStyle(
-                        fontSize: 11.sp,
-                        //fontFamily: 'Montserrat',
+                        fontSize: 15.sp,
+                        fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -77,8 +77,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Senha',
                       style: TextStyle(
-                        fontSize: 11.sp,
-                        //fontFamily: 'Montserrat',
+                        fontSize: 15.sp,
+                        fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -129,8 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Esqueceu sua senha?',
                         style: TextStyle(
-                          fontSize: 11.sp,
-                          //fontFamily: 'Montserrat',
+                          fontSize: 15.sp,
+                          fontFamily: 'Montserrat',
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -159,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'LOGIN',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12.sp,
+                            fontSize: 16.sp,
                             //fontFamily: 'Montserrat',
                             fontWeight: FontWeight.w600,
                           ),
@@ -176,8 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Registre-se ',
                       style: TextStyle(
                         color: primaryGreyColor,
-                        fontSize: 12.sp,
-                        //fontFamily: 'Montserrat',
+                        fontSize: 16.sp,
+                        fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -189,8 +189,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         'aqui',
                         style: TextStyle(
                           color: Colors.blue,
-                          fontSize: 12.sp,
-                          //fontFamily: 'Montserrat',
+                          fontSize: 16.sp,
+                          fontFamily: 'Montserrat',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
