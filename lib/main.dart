@@ -2,12 +2,10 @@ import 'routes/app_imports.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp();
-    print('Firebase Initialized');
-  } catch (e) {
-    print('Error initializing Firebase: $e');
-  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  Get.put(AuthController());
   runApp(MyApp());
 }
 

@@ -36,7 +36,7 @@ class _ForgottenScreenState extends State<ForgottenScreen> {
                     Text(
                       'Email',
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 15.sp,
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w500,
                       ),
@@ -85,7 +85,7 @@ class _ForgottenScreenState extends State<ForgottenScreen> {
                           'RECUPERAR',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12.sp,
+                            fontSize: 15.sp,
                             fontFamily: 'Montserrat',
                             fontWeight: FontWeight.w600,
                           ),
@@ -102,7 +102,7 @@ class _ForgottenScreenState extends State<ForgottenScreen> {
                       'Voltar para o ',
                       style: TextStyle(
                         color: primaryGreyColor,
-                        fontSize: 12.sp,
+                        fontSize: 16.sp,
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.w600,
                       ),
@@ -113,7 +113,7 @@ class _ForgottenScreenState extends State<ForgottenScreen> {
                         'Login',
                         style: TextStyle(
                           color: Colors.blue,
-                          fontSize: 12.sp,
+                          fontSize: 16.sp,
                           fontFamily: 'Montserrat',
                           fontWeight: FontWeight.w600,
                         ),

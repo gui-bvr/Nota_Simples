@@ -27,12 +27,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
                     'assets/logo/logo.jpg',
-                    width: 20.h,
-                    height: 20.h,
+                    width: 18.h,
+                    height: 18.h,
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 3.h),
+                Text(
+                  'NoteSnap',
+                  style: TextStyle(
+                    fontSize: 30.sp,
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 5.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
