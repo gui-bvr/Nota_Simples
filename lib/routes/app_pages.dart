@@ -14,13 +14,9 @@ abstract class AppPages {
       name: AppRoutes.forgotten,
       page: () => ForgottenScreen(),
     ),
-    /*GetPage(
+    GetPage(
       name: AppRoutes.home,
       page: () => HomeScreen(),
     ),
-    GetPage(
-      name: AppRoutes.example,
-      page: () => ExampleScreen(),
-    ),*/
   ];
 }
