@@ -6,20 +6,18 @@ import 'package:image_picker/image_picker.dart';
 import '../../controllers/categoria_controller.dart';
 import '../pictures_screen/pictures_screen.dart';
 import '../login_screen/login_screen.dart';
+import 'package:sizer/sizer.dart';
 
 class HomeScreen extends StatelessWidget {
   final CategoriaController controller = Get.put(CategoriaController());
 
-  // Estados reativos para o perfil
-  final RxString profileImagePath = ''.obs; // Caminho da imagem de perfil
-  final RxString userName = 'Usuário'.obs; // Nome escolhido pelo usuário
-  final RxString userEmail = ''.obs; // Email do Firebase
-
+  final RxString profileImagePath = ''.obs;
+  final RxString userName = 'Usuário'.obs;
+  final RxString userEmail = ''.obs;
   HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Obter o email do Firebase Authentication ao inicializar
     _fetchUserEmail();
 
     return Scaffold(
@@ -35,18 +33,24 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Seção do perfil
           _UserProfile(
             profileImagePath: profileImagePath,
             userName: userName,
             userEmail: userEmail,
             onLogout: _logout,
           ),
-          // Lista de categorias
           Expanded(
             child: Obx(() {
               if (controller.categorias.isEmpty) {
-                return Center(child: Text('Nenhuma categoria encontrada.'));
+                return Center(
+                    child: Text(
+                  'Nenhuma categoria encontrada.',
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w100,
+                  ),
+                ));
               }
               return ListView.builder(
                 itemCount: controller.categorias.length,
@@ -149,21 +153,43 @@ class HomeScreen extends StatelessWidget {
   void _mostrarDialogoDeletar(BuildContext context, Categoria categoria) {
     Get.dialog(
       AlertDialog(
-        title: Text('Deletar Categoria'),
+        title: Text(
+          'Deletar Categoria',
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         content: Text(
-          'Tem certeza de que deseja deletar a categoria "${categoria.nome}"? Todos os dados associados também serão apagados.',
+          'Tem certeza de que deseja deletar a categoria "${categoria.nome}"? Todas as imagens tambem serão excluidas.',
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w100,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text('Cancelar'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                fontSize: 16.sp,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () async {
               await controller.removerCategoria(categoria.id);
               Get.back();
             },
-            child: Text('Deletar'),
+            child: Text(
+              'Deletar',
+              style: TextStyle(
+                fontSize: 16.sp,
+              ),
+            ),
           ),
         ],
       ),
@@ -177,7 +203,7 @@ class _UserProfile extends StatelessWidget {
   final RxString userEmail;
   final VoidCallback onLogout;
 
-  _UserProfile({
+  const _UserProfile({
     required this.profileImagePath,
     required this.userName,
     required this.userEmail,
@@ -220,11 +246,6 @@ class _UserProfile extends StatelessWidget {
                     )),
               ],
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: onLogout,
-            tooltip: 'Sair',
           ),
         ],
       ),
