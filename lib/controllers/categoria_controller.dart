@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../db_helper.dart';
 
+//teste
+
 class Categoria {
   String id;
   String nome;
