@@ -1,71 +1,55 @@
+import 'dart:async';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
-
-  factory DBHelper() {
-    return _instance;
-  }
+  factory DBHelper() => _instance;
 
   DBHelper._internal();
 
-  Database? _db;
+  static Database? _database;
 
   Future<Database> get database async {
-    if (_db != null) return _db!;
-    _db = await _initDB();
-    return _db!;
+    if (_database != null) return _database!;
+    _database = await _initDB();
+    return _database!;
   }
 
   Future<Database> _initDB() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = join(directory.path, 'categories.db');
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'app_database.db');
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
+        // Tabela de Categorias
         await db.execute('''
           CREATE TABLE categories (
             id TEXT PRIMARY KEY,
-            name TEXT
+            name TEXT NOT NULL,
+            userId TEXT NOT NULL
           )
         ''');
 
+        // Tabela de Imagens
         await db.execute('''
           CREATE TABLE images (
             id TEXT PRIMARY KEY,
-            categoryId TEXT,
-            path TEXT,
+            categoryId TEXT NOT NULL,
+            path TEXT NOT NULL,
             description TEXT,
-            FOREIGN KEY (categoryId) REFERENCES categories (id)
+            userId TEXT NOT NULL,
+            FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE CASCADE
           )
         ''');
       },
     );
   }
 
-  Future<void> insertCategory(Map<String, dynamic> data) async {
+  Future<void> closeDB() async {
     final db = await database;
-    await db.insert('categories', data);
-  }
-
-  Future<void> insertImage(Map<String, dynamic> data) async {
-    final db = await database;
-    await db.insert('images', data);
-  }
-
-  Future<List<Map<String, dynamic>>> getCategories() async {
-    final db = await database;
-    return await db.query('categories');
-  }
-
-  Future<List<Map<String, dynamic>>> getImagesByCategory(
-      String categoryId) async {
-    final db = await database;
-    return await db
-        .query('images', where: 'categoryId = ?', whereArgs: [categoryId]);
+    db.close();
   }
 }

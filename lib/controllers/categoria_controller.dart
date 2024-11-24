@@ -1,10 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
-import '../db_helper.dart';
-
-//teste
+import '../../db_helper.dart';
 
 class Categoria {
   String id;
@@ -28,10 +27,11 @@ class ImageItem {
 }
 
 class CategoriaController extends GetxController {
-  var categorias = <Categoria>[].obs;
-  var imagens = <ImageItem>[].obs;
+  final DBHelper _dbHelper = DBHelper();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final _dbHelper = DBHelper();
+  var categorias = <Categoria>[].obs;
+  var imagens = <ImageItem>[].obs; // Lista reativa para imagens
 
   @override
   void onInit() {
@@ -39,198 +39,194 @@ class CategoriaController extends GetxController {
     _loadCategories();
   }
 
-  // Carregar categorias do banco de dados
+  // Carregar categorias do usuário logado
   Future<void> _loadCategories() async {
-    try {
-      final data = await _dbHelper.getCategories();
-      categorias.value =
-          data.map((e) => Categoria(id: e['id'], nome: e['name'])).toList();
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao carregar categorias: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
+    final user = _auth.currentUser;
+    if (user == null) return;
 
-  // Carregar imagens por categoria
-  Future<void> loadImages(String categoryId) async {
-    try {
-      final data = await _dbHelper.getImagesByCategory(categoryId);
-      imagens.value = data
-          .map((e) => ImageItem(
-                id: e['id'],
-                categoryId: e['categoryId'],
-                path: e['path'],
-                description: e['description'],
-              ))
-          .toList();
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao carregar imagens: $e',
-        snackPosition: SnackPosition.BOTTOM,
+    final db = await _dbHelper.database;
+    final data = await db.query(
+      'categories',
+      where: 'userId = ?',
+      whereArgs: [user.uid],
+    );
+
+    categorias.value = data.map((e) {
+      return Categoria(
+        id: e['id'] as String,
+        nome: e['name'] as String,
       );
-    }
+    }).toList();
   }
 
   // Adicionar uma nova categoria
   Future<void> adicionarCategoria(String nome) async {
-    try {
-      final id = const Uuid().v4();
-      final categoria = Categoria(id: id, nome: nome);
-      categorias.add(categoria);
-      await _dbHelper.insertCategory({'id': id, 'name': nome});
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao adicionar categoria: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final db = await _dbHelper.database;
+    final id = DateTime.now().toIso8601String();
+
+    await db.insert('categories', {
+      'id': id,
+      'name': nome,
+      'userId': user.uid,
+    });
+
+    categorias.add(Categoria(id: id, nome: nome));
+  }
+
+  // Editar uma categoria
+  Future<void> editarCategoria(String id, String novoNome) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final db = await _dbHelper.database;
+
+    await db.update(
+      'categories',
+      {'name': novoNome},
+      where: 'id = ? AND userId = ?',
+      whereArgs: [id, user.uid],
+    );
+
+    final index = categorias.indexWhere((cat) => cat.id == id);
+    if (index != -1) {
+      categorias[index].nome = novoNome;
+      categorias.refresh();
     }
+  }
+
+  // Remover uma categoria e suas imagens
+  Future<void> removerCategoria(String id) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final db = await _dbHelper.database;
+
+    // Remove as imagens associadas à categoria
+    await db.delete(
+      'images',
+      where: 'categoryId = ? AND userId = ?',
+      whereArgs: [id, user.uid],
+    );
+
+    // Remove a categoria
+    await db.delete(
+      'categories',
+      where: 'id = ? AND userId = ?',
+      whereArgs: [id, user.uid],
+    );
+
+    categorias.removeWhere((cat) => cat.id == id);
+  }
+
+  // Carregar imagens de uma categoria
+  Future<void> loadImages(String categoryId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final db = await _dbHelper.database;
+    final data = await db.query(
+      'images',
+      where: 'categoryId = ? AND userId = ?',
+      whereArgs: [categoryId, user.uid],
+    );
+
+    imagens.value = data.map((e) {
+      return ImageItem(
+        id: e['id'] as String,
+        categoryId: e['categoryId'] as String,
+        path: e['path'] as String,
+        description: e['description'] as String,
+      );
+    }).toList();
   }
 
   // Adicionar uma nova imagem
   Future<void> adicionarImagem(String categoryId, String description) async {
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final user = _auth.currentUser;
+    if (user == null) return;
 
-      if (pickedFile != null) {
-        final id = const Uuid().v4();
-        final image = ImageItem(
-          id: id,
-          categoryId: categoryId,
-          path: pickedFile.path,
-          description: description,
-        );
-        imagens.add(image);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-        await _dbHelper.insertImage({
-          'id': id,
-          'categoryId': categoryId,
-          'path': pickedFile.path,
-          'description': description,
-        });
-      }
-    } catch (e) {
+    if (pickedFile != null) {
+      final path = pickedFile.path;
+      final id = DateTime.now().toIso8601String();
+
+      final db = await _dbHelper.database;
+
+      await db.insert('images', {
+        'id': id,
+        'categoryId': categoryId,
+        'path': path,
+        'description': description,
+        'userId': user.uid,
+      });
+
+      imagens.add(ImageItem(
+        id: id,
+        categoryId: categoryId,
+        path: path,
+        description: description,
+      ));
+    } else {
       Get.snackbar(
         'Erro',
-        'Falha ao adicionar imagem: $e',
+        'Nenhuma imagem selecionada.',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
 
   // Editar descrição de uma imagem
-  Future<void> editarImagem(String imageId, String novaDescricao) async {
-    try {
-      final index = imagens.indexWhere((img) => img.id == imageId);
-      if (index != -1) {
-        imagens[index].description = novaDescricao;
-        imagens.refresh();
+  Future<void> editarImagem(String id, String novaDescricao) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
 
-        final db = await _dbHelper.database;
-        await db.update(
-          'images',
-          {'description': novaDescricao},
-          where: 'id = ?',
-          whereArgs: [imageId],
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao editar descrição: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    final db = await _dbHelper.database;
+
+    await db.update(
+      'images',
+      {'description': novaDescricao},
+      where: 'id = ? AND userId = ?',
+      whereArgs: [id, user.uid],
+    );
+
+    final index = imagens.indexWhere((img) => img.id == id);
+    if (index != -1) {
+      imagens[index].description = novaDescricao;
+      imagens.refresh();
     }
   }
 
   // Remover uma imagem
-  Future<void> removerImagem(String imageId) async {
-    try {
-      final index = imagens.indexWhere((img) => img.id == imageId);
-      if (index != -1) {
-        final path = imagens[index].path;
-        imagens.removeAt(index);
+  Future<void> removerImagem(String id) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
 
-        final db = await _dbHelper.database;
-        await db.delete(
-          'images',
-          where: 'id = ?',
-          whereArgs: [imageId],
-        );
+    final db = await _dbHelper.database;
 
-        // Deletar o arquivo físico
-        final file = File(path);
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao remover imagem: $e',
-        snackPosition: SnackPosition.BOTTOM,
+    final index = imagens.indexWhere((img) => img.id == id);
+    if (index != -1) {
+      final path = imagens[index].path;
+
+      // Remove do banco de dados
+      await db.delete(
+        'images',
+        where: 'id = ? AND userId = ?',
+        whereArgs: [id, user.uid],
       );
-    }
-  }
 
-  // Editar o nome de uma categoria
-  Future<void> editarCategoria(String id, String novoNome) async {
-    try {
-      final index = categorias.indexWhere((cat) => cat.id == id);
-      if (index != -1) {
-        categorias[index].nome = novoNome;
-        categorias.refresh();
+      // Remove da lista reativa
+      imagens.removeAt(index);
 
-        final db = await _dbHelper.database;
-        await db.update(
-          'categories',
-          {'name': novoNome},
-          where: 'id = ?',
-          whereArgs: [id],
-        );
+      // Exclui o arquivo local
+      final file = File(path);
+      if (file.existsSync()) {
+        file.deleteSync();
       }
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao editar categoria: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // Remover uma categoria
-  Future<void> removerCategoria(String id) async {
-    try {
-      final index = categorias.indexWhere((cat) => cat.id == id);
-      if (index != -1) {
-        categorias.removeAt(index);
-        categorias.refresh();
-
-        final db = await _dbHelper.database;
-        await db.delete(
-          'categories',
-          where: 'id = ?',
-          whereArgs: [id],
-        );
-
-        // Remover imagens associadas à categoria
-        await db.delete(
-          'images',
-          where: 'categoryId = ?',
-          whereArgs: [id],
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Erro',
-        'Falha ao remover categoria: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
     }
   }
 }
