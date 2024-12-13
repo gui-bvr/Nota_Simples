@@ -7,7 +7,8 @@ class FullscreenImage extends StatefulWidget {
   final List<String> imagePaths; // Lista de caminhos das imagens
   final int initialIndex; // Índice inicial
 
-  FullscreenImage({required this.imagePaths, required this.initialIndex});
+  const FullscreenImage(
+      {super.key, required this.imagePaths, required this.initialIndex});
 
   @override
   _FullscreenImageState createState() => _FullscreenImageState();

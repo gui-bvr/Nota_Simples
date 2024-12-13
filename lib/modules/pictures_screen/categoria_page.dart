@@ -6,16 +6,20 @@ import '../pictures_screen/pictures_screen.dart';
 class CategoriaPage extends StatelessWidget {
   final CategoriaController controller = Get.put(CategoriaController());
 
+  CategoriaPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Categorias')),
+      appBar: AppBar(title: const Text('Categorias')),
       body: Column(
         children: [
           Expanded(
             child: Obx(() {
               if (controller.categorias.isEmpty) {
-                return Center(child: Text('Nenhuma categoria encontrada.'));
+                return const Center(
+                  child: Text('Nenhuma categoria encontrada.'),
+                );
               }
               return ListView.builder(
                 itemCount: controller.categorias.length,
@@ -24,8 +28,7 @@ class CategoriaPage extends StatelessWidget {
                   return ListTile(
                     title: Text(categoria.nome),
                     onTap: () {
-                      // Navegar para a tela de imagens da categoria
-                      Get.to(() => PicturesScreen(categoria: categoria));
+                      _navegarParaPicturesScreen(categoria);
                     },
                   );
                 },
@@ -37,12 +40,27 @@ class CategoriaPage extends StatelessWidget {
       ),
     );
   }
+
+  void _navegarParaPicturesScreen(Categoria categoria) {
+    try {
+      print('Navegando para categoria: ${categoria.nome}, ID: ${categoria.id}');
+      Get.to(() => PicturesScreen(categoria: categoria));
+    } catch (e) {
+      print('Erro ao navegar para a categoria: $e');
+      Get.snackbar(
+        'Erro',
+        'Não foi possível abrir a categoria.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 }
 
 class _AdicionarCategoria extends StatefulWidget {
   final CategoriaController controller;
 
-  _AdicionarCategoria({required this.controller});
+  const _AdicionarCategoria({required this.controller, Key? key})
+      : super(key: key);
 
   @override
   _AdicionarCategoriaState createState() => _AdicionarCategoriaState();
@@ -66,11 +84,11 @@ class _AdicionarCategoriaState extends State<_AdicionarCategoria> {
           Expanded(
             child: TextField(
               controller: _nomeController,
-              decoration: InputDecoration(labelText: 'Nova Categoria'),
+              decoration: const InputDecoration(labelText: 'Nova Categoria'),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               if (_nomeController.text.isNotEmpty) {
                 widget.controller.adicionarCategoria(_nomeController.text);

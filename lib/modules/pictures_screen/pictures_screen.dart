@@ -7,14 +7,16 @@ import '../fullscreen_image.dart';
 class PicturesScreen extends StatelessWidget {
   final Categoria categoria;
 
-  PicturesScreen({required this.categoria});
-
-  final CategoriaController controller = Get.find();
+  const PicturesScreen({super.key, required this.categoria});
 
   @override
   Widget build(BuildContext context) {
-    // Carregar imagens da categoria ao entrar na tela
-    controller.loadImages(categoria.id);
+    final controller = Get.find<CategoriaController>();
+
+    // Carregar imagens da categoria ao abrir a tela
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadImages(categoria.id);
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text('Imagens: ${categoria.nome}')),
@@ -23,24 +25,36 @@ class PicturesScreen extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (controller.imagens.isEmpty) {
-                return Center(child: Text('Nenhuma imagem encontrada.'));
+                return const Center(
+                  child: Text('Nenhuma imagem encontrada.'),
+                );
               }
+
+              final validImages = controller.imagens
+                  .where((img) => File(img.path).existsSync())
+                  .toList();
+
+              if (validImages.isEmpty) {
+                return const Center(
+                  child: Text('Nenhuma imagem válida encontrada.'),
+                );
+              }
+
               return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
                 ),
-                itemCount: controller.imagens.length,
+                itemCount: validImages.length,
                 itemBuilder: (context, index) {
-                  final imagem = controller.imagens[index];
+                  final imagem = validImages[index];
                   return GestureDetector(
                     onTap: () {
-                      // Abrir a tela de visualização com navegação e zoom
+                      // Abrir tela de visualização com navegação e zoom
                       Get.to(() => FullscreenImage(
-                            imagePaths: controller.imagens
-                                .map((img) => img.path)
-                                .toList(),
+                            imagePaths:
+                                validImages.map((img) => img.path).toList(),
                             initialIndex: index,
                           ));
                     },
@@ -59,7 +73,7 @@ class PicturesScreen extends StatelessWidget {
                               child: Text(
                                 imagem.description,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ),
                             PopupMenuButton<String>(
@@ -70,7 +84,7 @@ class PicturesScreen extends StatelessWidget {
                                   _mostrarDialogoDeletar(context, imagem);
                                 }
                               },
-                              itemBuilder: (context) => [
+                              itemBuilder: (context) => const [
                                 PopupMenuItem(
                                   value: 'editar',
                                   child: Text('Editar'),
@@ -98,37 +112,40 @@ class PicturesScreen extends StatelessWidget {
 
   // Exibir diálogo para editar a descrição
   void _mostrarDialogoEditar(BuildContext context, ImageItem imagem) {
-    final _descricaoController =
-        TextEditingController(text: imagem.description);
+    final descricaoController = TextEditingController(text: imagem.description);
 
     Get.dialog(
       AlertDialog(
-        title: Text('Editar Descrição'),
+        title: const Text('Editar Descrição'),
         content: TextField(
-          controller: _descricaoController,
-          decoration: InputDecoration(labelText: 'Descrição'),
+          controller: descricaoController,
+          decoration: const InputDecoration(labelText: 'Descrição'),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text('Cancelar'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () async {
               try {
+                final controller = Get.find<CategoriaController>();
                 await controller.editarImagem(
                   imagem.id,
-                  _descricaoController.text,
+                  descricaoController.text,
                 );
                 Get.back();
               } catch (e) {
-                Get.snackbar('Erro', 'Falha ao editar descrição: $e',
-                    snackPosition: SnackPosition.BOTTOM);
+                Get.snackbar(
+                  'Erro',
+                  'Falha ao editar descrição: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
               }
             },
-            child: Text('Salvar'),
+            child: const Text('Salvar'),
           ),
         ],
       ),
@@ -139,26 +156,30 @@ class PicturesScreen extends StatelessWidget {
   void _mostrarDialogoDeletar(BuildContext context, ImageItem imagem) {
     Get.dialog(
       AlertDialog(
-        title: Text('Deletar Imagem'),
-        content: Text('Tem certeza de que deseja deletar esta imagem?'),
+        title: const Text('Deletar Imagem'),
+        content: const Text('Tem certeza de que deseja deletar esta imagem?'),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text('Cancelar'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () async {
               try {
+                final controller = Get.find<CategoriaController>();
                 await controller.removerImagem(imagem.id);
                 Get.back();
               } catch (e) {
-                Get.snackbar('Erro', 'Falha ao deletar imagem: $e',
-                    snackPosition: SnackPosition.BOTTOM);
+                Get.snackbar(
+                  'Erro',
+                  'Falha ao deletar imagem: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
               }
             },
-            child: Text('Deletar'),
+            child: const Text('Deletar'),
           ),
         ],
       ),
@@ -170,7 +191,7 @@ class PicturesScreen extends StatelessWidget {
 class _AdicionarImagem extends StatefulWidget {
   final Categoria categoria;
 
-  _AdicionarImagem({required this.categoria});
+  const _AdicionarImagem({required this.categoria});
 
   @override
   _AdicionarImagemState createState() => _AdicionarImagemState();
@@ -196,18 +217,26 @@ class _AdicionarImagemState extends State<_AdicionarImagem> {
           Expanded(
             child: TextField(
               controller: _descricaoController,
-              decoration: InputDecoration(labelText: 'Descrição'),
+              decoration: const InputDecoration(labelText: 'Descrição'),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
+            icon: const Icon(Icons.add),
+            onPressed: () async {
               if (_descricaoController.text.isNotEmpty) {
-                controller.adicionarImagem(
-                  widget.categoria.id,
-                  _descricaoController.text,
-                );
-                _descricaoController.clear();
+                try {
+                  await controller.adicionarImagem(
+                    widget.categoria.id,
+                    _descricaoController.text,
+                  );
+                  _descricaoController.clear();
+                } catch (e) {
+                  Get.snackbar(
+                    'Erro',
+                    'Falha ao adicionar imagem: $e',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
               } else {
                 Get.snackbar(
                   'Aviso',

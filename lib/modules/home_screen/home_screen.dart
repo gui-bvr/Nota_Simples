@@ -114,14 +114,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _mostrarDialogoEditar(BuildContext context, Categoria categoria) {
-    final TextEditingController _nomeController =
+    final TextEditingController nomeController =
         TextEditingController(text: categoria.nome);
 
     Get.dialog(
       AlertDialog(
         title: Text('Editar Categoria'),
         content: TextField(
-          controller: _nomeController,
+          controller: nomeController,
           decoration: InputDecoration(labelText: 'Novo Nome'),
         ),
         actions: [
@@ -131,9 +131,9 @@ class HomeScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              if (_nomeController.text.isNotEmpty) {
+              if (nomeController.text.isNotEmpty) {
                 await controller.editarCategoria(
-                    categoria.id, _nomeController.text);
+                    categoria.id, nomeController.text);
                 Get.back();
               } else {
                 Get.snackbar(
@@ -223,10 +223,8 @@ class _UserProfile extends StatelessWidget {
                 radius: 40,
                 backgroundImage: profileImagePath.isNotEmpty
                     ? FileImage(File(profileImagePath.value))
-                    : AssetImage('assets/default_avatar.png') as ImageProvider,
-                child: profileImagePath.isEmpty
-                    ? Icon(Icons.camera_alt, size: 30, color: Colors.white)
-                    : null,
+                    : AssetImage('assets/icons/default_avatar.png')
+                        as ImageProvider,
               ),
             );
           }),
@@ -265,11 +263,11 @@ class _UserProfile extends StatelessWidget {
 class _AdicionarCategoria extends StatelessWidget {
   final CategoriaController controller;
 
-  const _AdicionarCategoria(this.controller, {super.key});
+  const _AdicionarCategoria(this.controller);
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _nomeController = TextEditingController();
+    final TextEditingController nomeController = TextEditingController();
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -277,16 +275,16 @@ class _AdicionarCategoria extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
-              controller: _nomeController,
+              controller: nomeController,
               decoration: InputDecoration(labelText: 'Nova Categoria'),
             ),
           ),
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              if (_nomeController.text.isNotEmpty) {
-                controller.adicionarCategoria(_nomeController.text);
-                _nomeController.clear();
+              if (nomeController.text.isNotEmpty) {
+                controller.adicionarCategoria(nomeController.text);
+                nomeController.clear();
               } else {
                 Get.snackbar(
                   'Aviso',

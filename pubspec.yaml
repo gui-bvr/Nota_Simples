@@ -58,6 +58,7 @@ flutter:
   assets:
      - assets/logo/logo.webp
      - assets/logo/logo.jpg
+     - assets/icons/default_avatar.png
 
   fonts:
   - family: Montserrat
