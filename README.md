@@ -1,4 +1,4 @@
-<img src="https://github.com/gui-bvr/Nota_Simples/blob/main/assets/logo/logo.jpg?raw=true" alt="logo" style="zoom:5%;" />
+<img src="https://raw.githubusercontent.com/gui-bvr/Nota_Simples/refs/heads/main/assets/logo/logo.webp" alt="logo" style="zoom:5%;" />
 
 <p align="center"><strong>Nota Simples</strong></p>
 
