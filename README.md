@@ -1,4 +1,4 @@
-<img src="/Users/guilhermeviana/Documents/Flutter Projects/projeto_tcc/assets/logo/logo.webp" alt="logo" style="zoom:15%;" />
+<img src="https://github.com/gui-bvr/Nota_Simples/blob/main/assets/logo/logo.jpg?raw=true" alt="logo" style="zoom:15%;" />
 
 <p align="center"><strong>Nota Simples</strong></p>
 
